@@ -48,15 +48,15 @@
 
 机器人传感器数据通常以持续速率输入下游处理节点。当 Publisher 的实际输入速率高于 Subscriber 的实际处理能力时，系统进入过载状态：
 
-\[
+$$
 \lambda > \mu
-\]
+$$
 
 其中：
 
-- \(\lambda\)：Publisher 的实际输入速率，必须测量，不使用配置目标值代替；
-- \(\mu\)：Subscriber callback 的实际完成速率，必须测量；
-- \(\lambda_r\)：Recovery 阶段 Publisher 的实际输入速率。
+- $\lambda$：Publisher 的实际输入速率，必须测量，不使用配置目标值代替；
+- $\mu$：Subscriber callback 的实际完成速率，必须测量；
+- $\lambda_r$：Recovery 阶段 Publisher 的实际输入速率。
 
 ROS 2 History QoS 影响中间件历史样本的保留策略。不同策略可能影响：
 
@@ -124,12 +124,12 @@ Writer History Cache (WHC)      Reader History Cache (RHC)
 
 区分以下量：
 
-- \(T_{drain}\)：基于可观测序列号/回调事件定义的队列排空代理时间；
-- \(T_{age}\)：Publish-to-Callback Age 恢复到预先定义基线新鲜度范围的时间；
-- \(T_{mem50}\)：进程 RSS 释放峰值新增内存 50% 所需时间；
-- \(T_{mem90}\)：进程 RSS 释放峰值新增内存 90% 所需时间。
+- $T_{drain}$：基于可观测序列号/回调事件定义的队列排空代理时间；
+- $T_{age}$：Publish-to-Callback Age 恢复到预先定义基线新鲜度范围的时间；
+- $T_{mem50}$：进程 RSS 释放峰值新增内存 50% 所需时间；
+- $T_{mem90}$：进程 RSS 释放峰值新增内存 90% 所需时间。
 
-研究重点是实测恢复曲线与近似排队模型的差异，以及消息新鲜度恢复和内存恢复之间是否存在可重复的偏离。不预先假定 \(T_{mem90} \gg T_{age}\)，也不预先假定二者接近。
+研究重点是实测恢复曲线与近似排队模型的差异，以及消息新鲜度恢复和内存恢复之间是否存在可重复的偏离。不预先假定 $T_{mem90} \gg T_{age}$，也不预先假定二者接近。
 
 ## RQ3：重复过载是否导致超出无过载运行基线的内存漂移？
 
@@ -147,7 +147,7 @@ Writer History Cache (WHC)      Reader History Cache (RHC)
 
 ## C2：消息恢复与内存恢复的时间尺度分析
 
-区分 \(T_{drain}\)、\(T_{age}\)、\(T_{mem50}\)、\(T_{mem90}\)，比较实测恢复行为与简化流体排队模型的预测偏差。
+区分 $T_{drain}$、$T_{age}$、$T_{mem50}$、$T_{mem90}$，比较实测恢复行为与简化流体排队模型的预测偏差。
 
 ## C3：重复过载相对于无过载运行的内存基线变化
 
@@ -338,17 +338,17 @@ Subscriber 侧主矩阵：
 ## 8.2 速率定义
 
 - 计划发布速率：调度目标，仅作配置记录。
-- \(\lambda_{call}\)：实际 `publish()` 调用数 / 时间。
+- $\lambda_{call}$：实际 `publish()` 调用数 / 时间。
 - `publish()` 耗时分布：用于识别写端阻塞和背压。
 - callback rate：Subscriber 实际 callback 完成数 / 时间。
-- \(\mu\)：callback 完成速率。
-- \(\lambda_{rx}\)：DDS Reader 实际接收速率，如无可靠的 middleware 观测手段则标记为不可直接测量，不得用 callback rate 代替。
+- $\mu$：callback 完成速率。
+- $\lambda_{rx}$：DDS Reader 实际接收速率，如无可靠的 middleware 观测手段则标记为不可直接测量，不得用 callback rate 代替。
 
 ## 8.3 P1 工况有效性闸门
 
 P1 未通过之前不得进入正式 P2：
 
-1. 证明指定负载下实际 \(\lambda_{call}>\mu\)。
+1. 证明指定负载下实际 $\lambda_{call}>\mu$。
 2. 记录 `publish()` 耗时分布、阻塞时间比例和 missed deadlines。
 3. 检查系统 UDP 接收/发送错误、drop 计数和 `ss -m` 数据。
 4. 对 Publisher 序列号、callback 序列号、覆盖/丢失、未处理/残留样本进行尽可能完整的对账；不能观测到的类别必须明确列为未知，不做伪精确守恒式。
@@ -379,9 +379,9 @@ clock_gettime(CLOCK_MONOTONIC, ...)
 
 主指标定义：
 
-\[
+$$
 Age_{call\rightarrow callback}=t_{callback\_entry}-t_{publish\_start}
-\]
+$$
 
 该指标包含 Publisher 调用阶段可能发生的等待/背压和后续中间件交付时间，因此应同时报告 `publish_duration`。不得简单把 `t_publish_return` 当作所有样本的 Age 起点，因为 Subscriber callback 可能在 Publisher 的 `publish()` 尚未返回时已经开始执行。
 
@@ -413,22 +413,22 @@ BEST_EFFORT 补充实验中，最后一个数据序列号可能丢失，需要�
 
 建立一阶近似模型：
 
-\[
+$$
 \hat T_{drain}=\frac{Q_0}{\mu-\lambda_r},\quad \mu>\lambda_r
-\]
+$$
 
-其中 \(Q_0\) 是 Recovery 开始时的有效积压量。若 \(\lambda_r\approx\mu/2\)，则：
+其中 $Q_0$ 是 Recovery 开始时的有效积压量。若 $\lambda_r\approx\mu/2$，则：
 
-\[
+$$
 \hat T_{drain}\approx\frac{2Q_0}{\mu}
-\]
+$$
 
 重要限制：
 
-- \(Q_0\) 不能简单等于 History Depth；
+- $Q_0$ 不能简单等于 History Depth；
 - KEEP_LAST 可能覆盖旧样本，实际积压/样本年龄结构不等同于 FIFO 无损队列；
 - Writer WHC、ResourceLimits、分片/重组、网络路径和 callback 调度均可能偏离理想流体模型；
-- 若无法直接测量 \(Q_0\)，必须把估计方式和不确定性写清楚。
+- 若无法直接测量 $Q_0$，必须把估计方式和不确定性写清楚。
 
 模型用于给出基线预测，研究实测 T_drain/T_age 与预测之间的偏差，而不是把理想公式当作实际结果。
 
@@ -488,32 +488,32 @@ memory.oom.group
 
 过载前稳定阶段：
 
-\[
+$$
 M_0=\operatorname{median}(RSS_{baseline})
-\]
+$$
 
 峰值：
 
-\[
+$$
 M_{peak}=\max(RSS_{overload})
-\]
+$$
 
 新增内存：
 
-\[
+$$
 \Delta M=M_{peak}-M_0
-\]
+$$
 
 释放比例：
 
-\[
+$$
 F(t)=1-\frac{M(t)-M_0}{\Delta M}
-\]
+$$
 
 - `T_mem50`：F(t) 首次达到 0.5 且连续维持预先冻结的稳定时间；
 - `T_mem90`：F(t) 首次达到 0.9 且连续维持预先冻结的稳定时间；
 - P1 根据基线 RSS 波动与监控噪声确定 `ΔM_min`；
-- 若 \(\Delta M<\Delta M_{min}\)，该轮 T_mem 标记为不可判定；
+- 若 $\Delta M<\Delta M_{min}$，该轮 T_mem 标记为不可判定；
 - 超过预设观测窗口仍未恢复，记录右删失，例如 `T_mem90 > 600 s`（600 秒仅为初始候选，须 P1/P2 后冻结）；
 - RSS 低于 M0 时 F(t) 可以大于 1，不截断；
 - 持续 μ/2 Recovery 与 Silent Recovery 分别报告，不能混为同一自然恢复条件。
